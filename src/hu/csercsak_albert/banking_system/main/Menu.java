@@ -8,7 +8,6 @@ class Menu {
 
 	Menu(UserInput userInput, OptionTypes... options) {
 		this.options = null; //TODO initialize options
-
 	}
 
 }

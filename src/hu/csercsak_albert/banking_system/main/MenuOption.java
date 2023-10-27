@@ -7,5 +7,5 @@ public interface MenuOption {
 
 	void execute() throws SQLException;
 
-	void setup(Connection connection, UserInput userInput);
+	void setup(Connection connection, UserInput userInput, User user);
 }

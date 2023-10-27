@@ -32,13 +32,14 @@ class LoginMenuImpl implements LoginMenu {
 
 	@Override
 	public User loginOrRegister() throws SQLException {
+		User user;
 		System.out.println(menuText);
 		if (userInput.inputInt("Choose one", 1, 2) == 1) {
-			login();
+			user = login();
 		} else {
-			register();
+			user = register();
 		}
-		return null;
+		return user;
 	}
 
 	private User login() throws SQLException {
@@ -82,11 +83,30 @@ class LoginMenuImpl implements LoginMenu {
 			email = userInput.inputText("Email address");
 		} while (!checkEmail(email));
 		int accountNumber = generateNumber();
-		User user = new User(0, username, firstName, lastName, email, accountNumber);
+		User user = new User(0, username, firstName, lastName, email, accountNumber); // dummy ID
 		if (registerNewUser(password, user)) {
+			setDefaultBalance(user);
 			return user;
 		}
 		throw new UnsupportedOperationException("Registering new user has been failed");
+	}
+
+	private void setDefaultBalance(User user) throws SQLException {
+		try (var ps = connection.prepareStatement("INSERT INTO balance(userId,balance) VALUES(?,?)")) {
+			ps.setInt(1, getUserId(user));
+		}
+	}
+
+	private int getUserId(User user) throws SQLException {
+		try (var ps = connection.prepareStatement("SELECT id FROM user WHERE account_number = ?")) {
+			ps.setInt(1, user.accountNumber());
+			try (var rs = ps.executeQuery()) {
+				if (rs.next()) {
+					return rs.getInt(1);
+				}
+			}
+		}
+		throw new UnsupportedOperationException("Getting user ID has been failed");
 	}
 
 	private boolean registerNewUser(String hashedPassword, User user) throws SQLException {
@@ -131,9 +151,9 @@ class LoginMenuImpl implements LoginMenu {
 		return number;
 	}
 
-	// *******************************************
+	// ******************************************* 
 	// Validating
-	//
+	// //TODO Make validator for this
 
 	private boolean checkPw(String password) {
 		if (password.length() < MIN_PASSWORD_LENGTH) {
@@ -176,5 +196,4 @@ class LoginMenuImpl implements LoginMenu {
 			}
 		}
 	}
-
 }
