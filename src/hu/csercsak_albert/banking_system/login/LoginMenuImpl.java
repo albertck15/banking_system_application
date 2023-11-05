@@ -4,10 +4,12 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Random;
 
+import hu.csercsak_albert.banking_system.general.OperationException;
 import hu.csercsak_albert.banking_system.main.LoginMenu;
+import hu.csercsak_albert.banking_system.main.Menu;
+import hu.csercsak_albert.banking_system.main.OptionTypes;
 import hu.csercsak_albert.banking_system.main.User;
 import hu.csercsak_albert.banking_system.main.UserInput;
-import hu.csercsak_albert.banking_system.menu_options.OperationException;
 
 class LoginMenuImpl implements LoginMenu {
 
@@ -19,19 +21,21 @@ class LoginMenuImpl implements LoginMenu {
 
 	private final Connection connection;
 	private final UserInput userInput;
+	private final OptionTypes[] options;
 
 	private final String menuText = """
 			 1. Login
 			 2. Register
 			""";
 
-	public LoginMenuImpl(Connection connection, UserInput userInput) {
+	public LoginMenuImpl(Connection connection, UserInput userInput, OptionTypes... options) {
 		this.connection = connection;
 		this.userInput = userInput;
+		this.options = options;
 	}
 
 	@Override
-	public User loginOrRegister() throws SQLException {
+	public Menu loginOrRegister() throws SQLException {
 		User user;
 		System.out.println(menuText);
 		if (userInput.inputInt("Choose one", 1, 2) == 1) {
@@ -39,7 +43,7 @@ class LoginMenuImpl implements LoginMenu {
 		} else {
 			user = register();
 		}
-		return user;
+		return MenuImpl.get(user, userInput, options);
 	}
 
 	private User login() throws SQLException {
@@ -151,7 +155,7 @@ class LoginMenuImpl implements LoginMenu {
 		return number;
 	}
 
-	// ******************************************* 
+	// *******************************************
 	// Validating
 	// //TODO Make validator for this
 

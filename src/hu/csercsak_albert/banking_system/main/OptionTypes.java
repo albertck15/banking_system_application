@@ -2,15 +2,11 @@ package hu.csercsak_albert.banking_system.main;
 
 public enum OptionTypes {
 
-	//Login menu
-	LOGIN("Login"),
-	REGISTER("Register"),
-	
-	//Main menu after logging in
+	// Main menu after logging in
 	WITHDRAW("Withdraw"),
 	DEPOSIT("Deposit"),
-	SHOW_BALANCE("Show balance");
-	
+	SHOW_BALANCE("Show balance"),
+	TRANSFER("Transfer money");
 
 	private final String label;
 

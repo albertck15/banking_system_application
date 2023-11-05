@@ -4,5 +4,5 @@ import java.sql.SQLException;
 
 public interface LoginMenu {
 
-	User loginOrRegister() throws SQLException;
+	Menu loginOrRegister() throws SQLException;
 }

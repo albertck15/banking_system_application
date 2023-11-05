@@ -2,18 +2,30 @@ package hu.csercsak_albert.banking_system.menu_options;
 
 import java.sql.SQLException;
 
-class MoWithdraw extends AbstractMenuOption {
+import hu.csercsak_albert.banking_system.general.OperationException;
+import hu.csercsak_albert.banking_system.main.OptionTypes;
+
+class MOWithdraw extends AbstractMenuOption {
+
+	MOWithdraw(OptionTypes type) {
+		super(type.getLabel());
+	}
 
 	@Override
 	void doExecute() throws OperationException, SQLException {
 		long withdrawAmount = userInput.inputInt("Enter the amount", 0, Integer.MAX_VALUE);
 		long balance = getBalance();
 		if (balance > withdrawAmount) {
-			System.out.printf("Your balance don't have that amount!%n%n");
+			System.out.printf("Your balance don't have enough amount!%n%n");
 		} else {
 			long newBalance = balance - withdrawAmount;
 			updateBalance(newBalance);
 		}
+	}
+
+	@Override
+	public String getLabel() {
+		return label;
 	}
 
 	private void updateBalance(long newBalance) throws SQLException {

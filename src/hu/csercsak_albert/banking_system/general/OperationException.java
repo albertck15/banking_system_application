@@ -1,4 +1,4 @@
-package hu.csercsak_albert.banking_system.menu_options;
+package hu.csercsak_albert.banking_system.general;
 
 public class OperationException extends Exception {
 

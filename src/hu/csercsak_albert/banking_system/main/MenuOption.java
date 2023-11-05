@@ -5,6 +5,8 @@ import java.sql.SQLException;
 
 public interface MenuOption {
 
+	String getLabel();
+
 	void execute() throws SQLException;
 
 	void setup(Connection connection, UserInput userInput, User user);

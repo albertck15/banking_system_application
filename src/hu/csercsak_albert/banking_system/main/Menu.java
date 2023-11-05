@@ -1,13 +1,10 @@
 package hu.csercsak_albert.banking_system.main;
 
-import java.util.List;
+import hu.csercsak_albert.banking_system.general.FastQuitException;
+import hu.csercsak_albert.banking_system.general.OperationException;
 
-class Menu {
+public interface Menu {
 
-	private final List<MenuOption> options;
-
-	Menu(UserInput userInput, OptionTypes... options) {
-		this.options = null; //TODO initialize options
-	}
+	MenuOption choose() throws OperationException, FastQuitException;
 
 }

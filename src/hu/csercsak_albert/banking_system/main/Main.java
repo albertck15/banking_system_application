@@ -7,6 +7,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import hu.csercsak_albert.banking_system.general.FastQuitException;
+import hu.csercsak_albert.banking_system.general.OperationException;
 import hu.csercsak_albert.banking_system.login.LoginMenuContactPointImpl;
 
 public class Main {
@@ -19,13 +21,19 @@ public class Main {
 		var th = new TextHolder();
 		th.welcome();
 		try (var connection = getConnection(); var userInput = new UserInput()) {
-			User user = loginOrRegister(connection, userInput);
+			Menu mainMenu = loginOrRegister(connection, userInput);
+			for (MenuOption option;; option = mainMenu.choose()) {
+
+			}
 		} catch (SQLException e) {
 			throw new RuntimeException(e.getMessage() + "!");
+		} catch (OperationException e) { // TODO Might catch inside for
+		} catch (FastQuitException e) {
 		}
+		th.goodbye();
 	}
 
-	private User loginOrRegister(Connection connection, UserInput userInput) throws SQLException {
+	private Menu loginOrRegister(Connection connection, UserInput userInput) throws SQLException {
 		LoginMenu menu = new LoginMenuContactPointImpl().getLoginMenu(connection, userInput);
 		return menu.loginOrRegister();
 	}
