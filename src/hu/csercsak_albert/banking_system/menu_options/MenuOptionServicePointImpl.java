@@ -3,11 +3,20 @@ package hu.csercsak_albert.banking_system.menu_options;
 import java.util.ArrayList;
 import java.util.List;
 
+import hu.csercsak_albert.banking_system.login.MenuOptionServicePoint;
 import hu.csercsak_albert.banking_system.main.MenuOption;
-import hu.csercsak_albert.banking_system.main.MenuOptionServicePoint;
 import hu.csercsak_albert.banking_system.main.OptionTypes;
 
-class MenuOptionServicePointImpl implements MenuOptionServicePoint {
+public class MenuOptionServicePointImpl implements MenuOptionServicePoint {
+
+	private static final MenuOptionServicePointImpl INSTANCE = new MenuOptionServicePointImpl();
+
+	private MenuOptionServicePointImpl() {
+	}
+
+	public static MenuOptionServicePoint getInstance() {
+		return INSTANCE;
+	}
 
 	@Override
 	public List<MenuOption> getOptions(OptionTypes... types) {

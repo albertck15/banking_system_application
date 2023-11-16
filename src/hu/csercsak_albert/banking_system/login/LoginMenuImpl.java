@@ -10,18 +10,18 @@ import hu.csercsak_albert.banking_system.main.Menu;
 import hu.csercsak_albert.banking_system.main.OptionTypes;
 import hu.csercsak_albert.banking_system.main.User;
 import hu.csercsak_albert.banking_system.main.UserInput;
+import hu.csercsak_albert.banking_system.validator.EmailValidator;
+import hu.csercsak_albert.banking_system.validator.PasswordValidator;
+import hu.csercsak_albert.banking_system.validator.UsernameValidator;
 
 class LoginMenuImpl implements LoginMenu {
-
-	private static final int MIN_USERNAME_LENGTH = 3;
-
-	private static final int MIN_PASSWORD_LENGTH = 7;
-
-	private static final String SPECIAL_CHARS = "@#$&*_-+=<>";
 
 	private final Connection connection;
 	private final UserInput userInput;
 	private final OptionTypes[] options;
+	private final UsernameValidator usernameValidator = UsernameValidator.getInstance();
+	private final PasswordValidator pwValidator = PasswordValidator.getInstance();
+	private final EmailValidator emailValidator = EmailValidator.getInstance();
 
 	private final String menuText = """
 			 1. Login
@@ -36,17 +36,23 @@ class LoginMenuImpl implements LoginMenu {
 
 	@Override
 	public Menu loginOrRegister() throws SQLException {
-		User user;
+		User user = null;
 		System.out.println(menuText);
-		if (userInput.inputInt("Choose one", 1, 2) == 1) {
-			user = login();
-		} else {
-			user = register();
-		}
+		do {
+			try {
+				if (userInput.inputInt("==>", 1, 2) == 1) {
+					user = login();
+				} else {
+					user = register();
+				}
+			} catch (OperationException e) {
+				System.out.println(e.getMessage() + "!");
+			}
+		} while (user == null);
 		return MenuImpl.get(user, userInput, options);
 	}
 
-	private User login() throws SQLException {
+	private User login() throws SQLException, OperationException {
 		String username = null;
 		do {
 			username = userInput.inputText("Username");
@@ -54,6 +60,10 @@ class LoginMenuImpl implements LoginMenu {
 				return register(username);
 			}
 		} while (username == null);
+		return login(username);
+	}
+
+	private User login(String username) throws SQLException {
 		User user = null;
 		do {
 			String password = String.valueOf(userInput.inputText("Password").hashCode());
@@ -66,26 +76,31 @@ class LoginMenuImpl implements LoginMenu {
 		return user;
 	}
 
-	private User register() throws SQLException {
+	private User register() throws SQLException, OperationException {
 		String username;
 		do {
 			username = userInput.inputText("Username");
-		} while (username.length() <= MIN_USERNAME_LENGTH);
+		} while (!usernameValidator.validate(username));
 		return register(username);
 	}
 
-	private User register(String username) throws SQLException {
+	private User register(String username) throws SQLException, OperationException {
+		if (isUserExists(username) && !userInput.inputBool("\n Username already exists! Would you like to login")) { // TODO Not working correctly.
+			throw new OperationException("You've stopped the login process");
+		} else if (isUserExists(username)) {
+			return login(username);
+		}
 		String password;
 		do {
 			password = userInput.inputText("Password");
-		} while (!checkPw(password));
+		} while (!pwValidator.validate(password));
 		password = String.valueOf(password.hashCode()); // NOT SAFE! Just to imitate 'hashing'
 		String firstName = userInput.inputText("First name");
 		String lastName = userInput.inputText("Last name");
 		String email;
 		do {
 			email = userInput.inputText("Email address");
-		} while (!checkEmail(email));
+		} while (!emailValidator.validate(email));
 		int accountNumber = generateNumber();
 		User user = new User(0, username, firstName, lastName, email, accountNumber); // dummy ID
 		if (registerNewUser(password, user)) {
@@ -95,7 +110,7 @@ class LoginMenuImpl implements LoginMenu {
 		throw new UnsupportedOperationException("Registering new user has been failed");
 	}
 
-	private void setDefaultBalance(User user) throws SQLException {
+	private void setDefaultBalance(User user) throws SQLException { // TODO Look up if RDBMS can do this instead of the code.
 		try (var ps = connection.prepareStatement("INSERT INTO balance(userId,balance) VALUES(?,?)")) {
 			ps.setInt(1, getUserId(user));
 		}
@@ -153,34 +168,6 @@ class LoginMenuImpl implements LoginMenu {
 			number = random.nextInt(9_999_999);
 		} while (isAccountNumberAvailable(number));
 		return number;
-	}
-
-	// *******************************************
-	// Validating
-	// //TODO Make validator for this
-
-	private boolean checkPw(String password) {
-		if (password.length() < MIN_PASSWORD_LENGTH) {
-			System.out.println("Minimum password length = " + MIN_PASSWORD_LENGTH);
-			return false;
-		}
-		boolean hasNumber = false;
-		boolean hasUppercase = false;
-		boolean hasSpecial = false;
-		for (char ch : password.toCharArray()) {
-			if (Character.isDigit(ch)) {
-				hasNumber = true;
-			} else if (Character.isUpperCase(ch)) {
-				hasUppercase = true;
-			} else if (SPECIAL_CHARS.indexOf(ch) >= 0) {
-				hasSpecial = true;
-			}
-		}
-		return hasNumber && hasUppercase && hasSpecial;
-	}
-
-	private boolean checkEmail(String email) {
-		return email.matches("^[A-Za-z0-9+_.-]+@(.+)$");
 	}
 
 	private boolean isUserExists(String username) throws SQLException {

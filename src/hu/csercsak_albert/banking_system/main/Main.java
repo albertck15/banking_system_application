@@ -22,12 +22,9 @@ public class Main {
 		th.welcome();
 		try (var connection = getConnection(); var userInput = new UserInput()) {
 			Menu mainMenu = loginOrRegister(connection, userInput);
-			for (MenuOption option;; option = mainMenu.choose()) {
-
-			}
+			chooseAndExecute(mainMenu);
 		} catch (SQLException e) {
 			throw new RuntimeException(e.getMessage() + "!");
-		} catch (OperationException e) { // TODO Might catch inside for
 		} catch (FastQuitException e) {
 		}
 		th.goodbye();
@@ -36,6 +33,16 @@ public class Main {
 	private Menu loginOrRegister(Connection connection, UserInput userInput) throws SQLException {
 		LoginMenu menu = new LoginMenuContactPointImpl().getLoginMenu(connection, userInput);
 		return menu.loginOrRegister();
+	}
+
+	private void chooseAndExecute(Menu mainMenu) throws FastQuitException, SQLException {
+		try {
+			for (MenuOption option; (option = mainMenu.choose()) != null;) {
+				option.execute();
+			}
+		} catch (OperationException e) {
+			System.out.println(e.getMessage() + "!");
+		}
 	}
 
 	private Connection getConnection() throws SQLException {
