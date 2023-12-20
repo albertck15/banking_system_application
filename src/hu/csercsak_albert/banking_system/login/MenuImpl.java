@@ -29,6 +29,7 @@ class MenuImpl implements Menu {
 
 	@Override
 	public MenuOption choose() throws FastQuitException, OperationException {
+		System.out.println(menuText);
 		return options.get(userInput.inputInt(menuText + "-->", 1, options.size()) - 1);
 	}
 

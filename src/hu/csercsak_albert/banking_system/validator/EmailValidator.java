@@ -15,7 +15,7 @@ public class EmailValidator implements Validator {
 
 	@Override
 	public boolean validate(String email) {
-		return email.matches("^[A-Za-z0-9+_.-]+@(.+)$");
+		return email.matches("^[A-Za-z0-9+_.-]+@(.+)\\.[A-Za-z]+$");
 	}
 
 }

@@ -40,13 +40,13 @@ class LoginMenuImpl implements LoginMenu {
 		System.out.println(menuText);
 		do {
 			try {
-				if (userInput.inputInt("==>", 1, 2) == 1) {
+				if (userInput.inputInt("Choose", 1, 2) == 1) {
 					user = login();
 				} else {
 					user = register();
 				}
 			} catch (OperationException e) {
-				System.out.println(e.getMessage() + "!");
+				System.out.printf("%s!%n%n",e.getMessage());
 			}
 		} while (user == null);
 		return MenuImpl.get(user, userInput, options);
