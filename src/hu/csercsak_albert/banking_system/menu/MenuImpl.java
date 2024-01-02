@@ -28,7 +28,27 @@ public class MenuImpl implements Menu {
 		this.userInput = builder.userInput;
 		this.prompt = builder.prompt;
 		this.options = getMenuOptions(builder.options.toArray(new OptionTypes[0]));
+		addExitOption();
 		this.menuText = compileMenuText();
+	}
+
+	private void addExitOption() {
+		options.add(new MenuOption() {
+
+			@Override
+			public void setup(Connection connection, UserInput userInput, User user) {
+			}
+
+			@Override
+			public String getLabel() {
+				return "Quit";
+			}
+
+			@Override
+			public void execute() throws SQLException, FastQuitException {
+				throw new FastQuitException();
+			}
+		});
 	}
 
 	@Override
@@ -36,12 +56,14 @@ public class MenuImpl implements Menu {
 		if (user == null) {
 			try {
 				user = loginOrRegister();
-				setupOptions(); 
+				setupOptions();
+				printWelcome();
+				System.out.println();
 			} catch (SQLException e) {
-				throw new RuntimeException("Logging in has been failed!(%s)".formatted(e.getMessage()));
+				throw new RuntimeException("Login or register has been failed!(%s)".formatted(e.getMessage()));
 			}
 		}
-		return options.get(userInput.inputInt(menuText + prompt, 1, options.size()) - 1);
+		return options.get(userInput.chooseInt(menuText + prompt, 1, options.size()) - 1);
 	}
 
 	private void setupOptions() {
@@ -51,11 +73,15 @@ public class MenuImpl implements Menu {
 	}
 
 	private User loginOrRegister() throws SQLException {
-		return new LoginMenuImpl(connection, userInput).loginOrRegister();
+		return new LoginMenu(connection, userInput).loginOrRegister();
 	}
 
 	private List<MenuOption> getMenuOptions(OptionTypes[] options) {
 		return MenuOptionServicePointImpl.getInstance().getOptions(options);
+	}
+
+	private void printWelcome() {
+		System.out.printf("%n Welcome %s %s!%n", user.firstName(), user.lastName());
 	}
 
 	private String compileMenuText() {
@@ -64,7 +90,7 @@ public class MenuImpl implements Menu {
 		for (var option : options) {
 			menuTextBuilder.append(" %d. %s%n".formatted(i++, option.getLabel()));
 		}
-		return menuTextBuilder + "";
+		return menuTextBuilder.append("\n") + "";
 	}
 
 	public static class Builder {

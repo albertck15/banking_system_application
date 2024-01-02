@@ -20,6 +20,19 @@ public class UserInput implements AutoCloseable {
 		}
 	}
 
+	public int chooseInt(String prompt, int min, int max) {
+		for (;;) {
+			System.out.print(prompt);
+			try {
+				int input = Integer.parseInt(scanner.nextLine().strip());
+				if (input >= min && input <= max) {
+					return input;
+				}
+			} catch (NumberFormatException e) {
+			}
+		}
+	}
+
 	public int inputInt(String prompt, int min, int max) {
 		for (;;) {
 			System.out.print(prompt + " : ");
@@ -39,7 +52,7 @@ public class UserInput implements AutoCloseable {
 			try {
 				String input = scanner.nextLine().strip();
 				if (!input.isBlank()) {
-					return input.startsWith("");
+					return input.startsWith("y");
 				}
 			} catch (NumberFormatException e) {
 			}

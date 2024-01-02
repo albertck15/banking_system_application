@@ -20,7 +20,7 @@ public class PasswordValidator implements Validator {
 	@Override
 	public boolean validate(String password) {
 		if (password.length() < MIN_PASSWORD_LENGTH) {
-			System.out.println("Minimum password length = " + MIN_PASSWORD_LENGTH);
+			System.out.printf("%n Minimum password length = %d%n%n",MIN_PASSWORD_LENGTH);
 			return false;
 		}
 		boolean hasNumber = false;
@@ -36,7 +36,7 @@ public class PasswordValidator implements Validator {
 			}
 		}
 		if(!hasNumber || !hasUppercase || !hasSpecial) {
-			System.out.printf("%nPassword should contain a number, uppercase letter and a special character%n%n");
+			System.out.printf("%n Password should contain a number, uppercase letter and a special character%n%n");
 		}
 		return hasNumber && hasUppercase && hasSpecial;
 	}

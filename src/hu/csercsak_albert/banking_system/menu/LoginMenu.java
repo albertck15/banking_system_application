@@ -11,7 +11,7 @@ import hu.csercsak_albert.banking_system.validator.EmailValidator;
 import hu.csercsak_albert.banking_system.validator.PasswordValidator;
 import hu.csercsak_albert.banking_system.validator.UsernameValidator;
 
-class LoginMenuImpl {
+class LoginMenu {
 
 	private final Connection connection;
 	private final UserInput userInput;
@@ -24,7 +24,7 @@ class LoginMenuImpl {
 			 2. Register
 			""";
 
-	LoginMenuImpl(Connection connection, UserInput userInput) {
+	LoginMenu(Connection connection, UserInput userInput) {
 		this.connection = connection;
 		this.userInput = userInput;
 	}
@@ -49,9 +49,14 @@ class LoginMenuImpl {
 	private User login() throws SQLException, OperationException {
 		String username = null;
 		do {
+			System.out.println();
 			username = userInput.inputText("Username");
-			if (!isUserExists(username) && userInput.inputBool("\n Username not found! Would you like to register with this username")) {
-				return register(username);
+			if (!isUserExists(username)) {
+				if (userInput.inputBool("\n Username not found! Would you like to register with this username")) {
+					return register(username);
+				} else {
+					username = null;
+				}
 			}
 		} while (username == null);
 		return login(username);
@@ -98,7 +103,9 @@ class LoginMenuImpl {
 		int accountNumber = generateNumber();
 		User user = new User(0, username, firstName, lastName, email, accountNumber); // dummy ID
 		if (registerNewUser(password, user)) {
+			user = new User(getUserId(user), username, firstName, lastName, email, accountNumber); // replacing dummy ID
 			setDefaultBalance(user);
+			System.out.printf("%n You've succesfully registered!%n%n");
 			return user;
 		}
 		throw new UnsupportedOperationException("Registering new user has been failed");
