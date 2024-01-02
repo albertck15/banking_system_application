@@ -3,9 +3,9 @@ package hu.csercsak_albert.banking_system.menu_options;
 import java.util.ArrayList;
 import java.util.List;
 
-import hu.csercsak_albert.banking_system.login.MenuOptionServicePoint;
 import hu.csercsak_albert.banking_system.main.MenuOption;
 import hu.csercsak_albert.banking_system.main.OptionTypes;
+import hu.csercsak_albert.banking_system.menu.MenuOptionServicePoint;
 
 public class MenuOptionServicePointImpl implements MenuOptionServicePoint {
 

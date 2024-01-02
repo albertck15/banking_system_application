@@ -1,24 +1,20 @@
-package hu.csercsak_albert.banking_system.login;
+package hu.csercsak_albert.banking_system.menu;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Random;
 
 import hu.csercsak_albert.banking_system.general.OperationException;
-import hu.csercsak_albert.banking_system.main.LoginMenu;
-import hu.csercsak_albert.banking_system.main.Menu;
-import hu.csercsak_albert.banking_system.main.OptionTypes;
 import hu.csercsak_albert.banking_system.main.User;
 import hu.csercsak_albert.banking_system.main.UserInput;
 import hu.csercsak_albert.banking_system.validator.EmailValidator;
 import hu.csercsak_albert.banking_system.validator.PasswordValidator;
 import hu.csercsak_albert.banking_system.validator.UsernameValidator;
 
-class LoginMenuImpl implements LoginMenu {
+class LoginMenuImpl {
 
 	private final Connection connection;
 	private final UserInput userInput;
-	private final OptionTypes[] options;
 	private final UsernameValidator usernameValidator = UsernameValidator.getInstance();
 	private final PasswordValidator pwValidator = PasswordValidator.getInstance();
 	private final EmailValidator emailValidator = EmailValidator.getInstance();
@@ -28,14 +24,12 @@ class LoginMenuImpl implements LoginMenu {
 			 2. Register
 			""";
 
-	public LoginMenuImpl(Connection connection, UserInput userInput, OptionTypes... options) {
+	LoginMenuImpl(Connection connection, UserInput userInput) {
 		this.connection = connection;
 		this.userInput = userInput;
-		this.options = options;
 	}
 
-	@Override
-	public Menu loginOrRegister() throws SQLException {
+	User loginOrRegister() throws SQLException {
 		User user = null;
 		System.out.println(menuText);
 		do {
@@ -46,10 +40,10 @@ class LoginMenuImpl implements LoginMenu {
 					user = register();
 				}
 			} catch (OperationException e) {
-				System.out.printf("%s!%n%n",e.getMessage());
+				System.out.printf("%s!%n%n", e.getMessage());
 			}
 		} while (user == null);
-		return MenuImpl.get(user, userInput, options);
+		return user;
 	}
 
 	private User login() throws SQLException, OperationException {
@@ -110,9 +104,11 @@ class LoginMenuImpl implements LoginMenu {
 		throw new UnsupportedOperationException("Registering new user has been failed");
 	}
 
-	private void setDefaultBalance(User user) throws SQLException { // TODO Look up if RDBMS can do this instead of the code.
-		try (var ps = connection.prepareStatement("INSERT INTO balance(userId,balance) VALUES(?,?)")) {
+	private void setDefaultBalance(User user) throws SQLException {
+		try (var ps = connection.prepareStatement("INSERT INTO balance(user_id,balance) VALUES(?,?)")) {
 			ps.setInt(1, getUserId(user));
+			ps.setLong(2, 0);
+			ps.executeUpdate();
 		}
 	}
 

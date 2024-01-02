@@ -1,6 +1,6 @@
 package hu.csercsak_albert.banking_system.validator;
 
-import hu.csercsak_albert.banking_system.login.Validator;
+import hu.csercsak_albert.banking_system.menu.Validator;
 
 public class EmailValidator implements Validator {
 

@@ -29,14 +29,15 @@ class MOWithdraw extends AbstractMenuOption {
 	}
 
 	private void updateBalance(long newBalance) throws SQLException {
-		try (var ps = connection.prepareStatement("UPDATE balance SET balance = ? WHERE userId = ?")) {
+		try (var ps = connection.prepareStatement("UPDATE balance SET balance = ? WHERE user_id = ?")) {
 			ps.setLong(1, newBalance);
 			ps.setInt(2, user.id());
+			ps.executeUpdate();
 		}
 	}
 
 	private long getBalance() throws SQLException {
-		try (var ps = connection.prepareStatement("SELECT balance FROM balance WHERE userId = ?")) {
+		try (var ps = connection.prepareStatement("SELECT balance FROM balance WHERE user_id = ?")) {
 			ps.setInt(1, user.id());
 			try (var rs = ps.executeQuery()) {
 				if (rs.next()) {

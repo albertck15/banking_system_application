@@ -1,4 +1,4 @@
-package hu.csercsak_albert.banking_system.login;
+package hu.csercsak_albert.banking_system.menu;
 
 public interface Validator {
 

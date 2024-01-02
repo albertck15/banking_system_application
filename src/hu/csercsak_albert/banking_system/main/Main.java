@@ -9,7 +9,7 @@ import java.util.Properties;
 
 import hu.csercsak_albert.banking_system.general.FastQuitException;
 import hu.csercsak_albert.banking_system.general.OperationException;
-import hu.csercsak_albert.banking_system.login.LoginMenuContactPointImpl;
+import hu.csercsak_albert.banking_system.menu.MenuImpl;
 
 public class Main {
 
@@ -21,8 +21,12 @@ public class Main {
 		var th = new TextHolder();
 		th.welcome();
 		try (var connection = getConnection(); var userInput = new UserInput()) {
-			Menu mainMenu = loginOrRegister(connection, userInput);
-			chooseAndExecute(mainMenu);
+			Menu menu = new MenuImpl.Builder().setConnection(connection)//
+					.setUserInput(userInput)//
+					.setPrompt("-->")//
+					.addOptions(OptionTypes.values())//
+					.build();
+			chooseAndExecute(menu);
 		} catch (SQLException e) {
 			throw new RuntimeException(e.getMessage() + "!");
 		} catch (FastQuitException e) {
@@ -30,15 +34,11 @@ public class Main {
 		th.goodbye();
 	}
 
-	private Menu loginOrRegister(Connection connection, UserInput userInput) throws SQLException {
-		LoginMenu menu = new LoginMenuContactPointImpl().getLoginMenu(connection, userInput);
-		return menu.loginOrRegister();
-	}
-
 	private void chooseAndExecute(Menu mainMenu) throws FastQuitException, SQLException {
 		try {
 			for (MenuOption option; (option = mainMenu.choose()) != null;) {
 				option.execute();
+				System.out.println();
 			}
 		} catch (OperationException e) {
 			System.out.println(e.getMessage() + "!");

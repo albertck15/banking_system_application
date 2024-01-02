@@ -13,7 +13,13 @@ public class MOShowBalance extends AbstractMenuOption {
 
 	@Override
 	void doExecute() throws OperationException, SQLException {
-		try(var ps = connection.prepareStatement("")){ // TODO Define query
+		try (var ps = connection.prepareStatement("SELECT balance FROM balance WHERE user_id = ?")) {
+			ps.setInt(1, user.id());
+			try (var rs = ps.executeQuery()) {
+				if (rs.next()) {
+					System.out.printf("%n Your balance : %,d%n%n", rs.getLong(1));
+				}
+			}
 		}
 	}
 
