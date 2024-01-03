@@ -56,7 +56,7 @@ public class MenuImpl implements Menu {
 		if (user == null) {
 			try {
 				user = loginOrRegister();
-				setupOptions();
+				setupOptions(); // Setting up options after we know the user
 				printWelcome();
 				System.out.println();
 			} catch (SQLException e) {
@@ -72,7 +72,7 @@ public class MenuImpl implements Menu {
 		}
 	}
 
-	private User loginOrRegister() throws SQLException {
+	private User loginOrRegister() throws SQLException, FastQuitException {
 		return new LoginMenu(connection, userInput).loginOrRegister();
 	}
 
@@ -97,7 +97,7 @@ public class MenuImpl implements Menu {
 
 		private Connection connection;
 		private UserInput userInput;
-		private String prompt = "-->";
+		private String prompt = "--> ";
 		private List<OptionTypes> options = new ArrayList<>();
 
 		public Builder setConnection(Connection connection) {
@@ -111,7 +111,7 @@ public class MenuImpl implements Menu {
 		}
 
 		public Builder setPrompt(String prompt) {
-			this.prompt = prompt;
+			this.prompt = prompt + " ";
 			return this;
 		}
 

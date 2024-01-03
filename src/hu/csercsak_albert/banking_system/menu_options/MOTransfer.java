@@ -8,17 +8,18 @@ import hu.csercsak_albert.banking_system.main.OptionTypes;
 import hu.csercsak_albert.banking_system.main.TransactionHandler;
 import hu.csercsak_albert.banking_system.transaction.TransactionHandlerImpl;
 
-class MOWithdraw extends AbstractMenuOption {
+class MOTransfer extends AbstractMenuOption {
 
 	private static final TransactionHandler TRANSACTION_HANDLER = TransactionHandlerImpl.getInstance();
 
-	MOWithdraw(OptionTypes type) {
+	MOTransfer(OptionTypes type) {
 		super(type.getLabel());
 	}
 
 	@Override
 	void doExecute() throws OperationException, SQLException, FastQuitException {
-		int withdrawAmount = userInput.inputInt("Enter the amount", 0, Integer.MAX_VALUE);
-		TRANSACTION_HANDLER.makeWithdraw(connection, user.id(), withdrawAmount);
+		int toAccountNum = userInput.inputInt("Reciever account number", 0, Integer.MAX_VALUE);
+		// TODO Implement getting user by his account number, then make a transaction
 	}
+
 }

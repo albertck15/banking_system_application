@@ -31,6 +31,7 @@ public class MenuOptionServicePointImpl implements MenuOptionServicePoint {
 		return switch (type) {
 			case WITHDRAW -> new MOWithdraw(type);
 			case SHOW_BALANCE -> new MOShowBalance(type);
+			case DEPOSIT -> new MODeposit(type);
 			default -> new MONotImplemented(type);
 		};
 	}

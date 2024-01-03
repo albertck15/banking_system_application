@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Random;
 
+import hu.csercsak_albert.banking_system.general.FastQuitException;
 import hu.csercsak_albert.banking_system.general.OperationException;
 import hu.csercsak_albert.banking_system.main.User;
 import hu.csercsak_albert.banking_system.main.UserInput;
@@ -29,7 +30,7 @@ class LoginMenu {
 		this.userInput = userInput;
 	}
 
-	User loginOrRegister() throws SQLException {
+	User loginOrRegister() throws SQLException, FastQuitException {
 		User user = null;
 		System.out.println(menuText);
 		do {
@@ -46,7 +47,7 @@ class LoginMenu {
 		return user;
 	}
 
-	private User login() throws SQLException, OperationException {
+	private User login() throws SQLException, OperationException, FastQuitException {
 		String username = null;
 		do {
 			System.out.println();
@@ -62,7 +63,7 @@ class LoginMenu {
 		return login(username);
 	}
 
-	private User login(String username) throws SQLException {
+	private User login(String username) throws SQLException, FastQuitException {
 		User user = null;
 		do {
 			String password = String.valueOf(userInput.inputText("Password").hashCode());
@@ -75,7 +76,7 @@ class LoginMenu {
 		return user;
 	}
 
-	private User register() throws SQLException, OperationException {
+	private User register() throws SQLException, OperationException, FastQuitException {
 		String username;
 		do {
 			username = userInput.inputText("Username");
@@ -83,7 +84,7 @@ class LoginMenu {
 		return register(username);
 	}
 
-	private User register(String username) throws SQLException, OperationException {
+	private User register(String username) throws SQLException, OperationException, FastQuitException {
 		if (isUserExists(username) && !userInput.inputBool("\n Username already exists! Would you like to login")) { // TODO Not working correctly.
 			throw new OperationException("You've stopped the login process");
 		} else if (isUserExists(username)) {

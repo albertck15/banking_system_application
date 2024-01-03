@@ -8,17 +8,17 @@ import hu.csercsak_albert.banking_system.main.OptionTypes;
 import hu.csercsak_albert.banking_system.main.TransactionHandler;
 import hu.csercsak_albert.banking_system.transaction.TransactionHandlerImpl;
 
-class MOWithdraw extends AbstractMenuOption {
+class MODeposit extends AbstractMenuOption {
 
 	private static final TransactionHandler TRANSACTION_HANDLER = TransactionHandlerImpl.getInstance();
 
-	MOWithdraw(OptionTypes type) {
+	MODeposit(OptionTypes type) {
 		super(type.getLabel());
 	}
 
 	@Override
 	void doExecute() throws OperationException, SQLException, FastQuitException {
-		int withdrawAmount = userInput.inputInt("Enter the amount", 0, Integer.MAX_VALUE);
-		TRANSACTION_HANDLER.makeWithdraw(connection, user.id(), withdrawAmount);
+		int amount = userInput.inputInt("Enter deposit amount", 0, Integer.MAX_VALUE);
+		TRANSACTION_HANDLER.makeDeposit(connection, user.id(), amount);
 	}
 }

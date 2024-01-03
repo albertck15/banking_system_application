@@ -3,13 +3,14 @@ package hu.csercsak_albert.banking_system.menu_options;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import hu.csercsak_albert.banking_system.general.FastQuitException;
 import hu.csercsak_albert.banking_system.general.OperationException;
 import hu.csercsak_albert.banking_system.main.MenuOption;
 import hu.csercsak_albert.banking_system.main.User;
 import hu.csercsak_albert.banking_system.main.UserInput;
 
 abstract class AbstractMenuOption implements MenuOption {
-
+	
 	protected Connection connection;
 	protected UserInput userInput;
 	protected User user;
@@ -27,7 +28,7 @@ abstract class AbstractMenuOption implements MenuOption {
 	}
 
 	@Override
-	public void execute() throws SQLException {
+	public void execute() throws SQLException, FastQuitException {
 		try {
 			doExecute();
 		} catch (OperationException e) {
@@ -40,6 +41,6 @@ abstract class AbstractMenuOption implements MenuOption {
 		return label;
 	}
 
-	abstract void doExecute() throws OperationException, SQLException;
+	abstract void doExecute() throws OperationException, SQLException, FastQuitException;
 
 }

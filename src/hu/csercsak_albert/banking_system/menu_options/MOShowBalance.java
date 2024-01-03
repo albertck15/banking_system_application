@@ -17,7 +17,7 @@ public class MOShowBalance extends AbstractMenuOption {
 			ps.setInt(1, user.id());
 			try (var rs = ps.executeQuery()) {
 				if (rs.next()) {
-					System.out.printf("%n Your balance : %,d%n%n", rs.getLong(1));
+					System.out.printf("%n Your balance : $%,d%n%n", rs.getLong(1));
 				}
 			}
 		}
