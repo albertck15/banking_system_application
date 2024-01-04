@@ -26,16 +26,36 @@ public class TransactionHandlerImpl implements TransactionHandler {
 	public void makeTransaction(Connection connection, Transaction transaction) throws OperationException, SQLException {
 		int fromId = transaction.from().id();
 		int toId = transaction.to().id();
-		if (isAmountAvailable(connection, fromId, transaction.amount())) {
+		int amount = transaction.total();
+		if (isAmountAvailable(connection, fromId, amount)) {
+			logToDb(connection, transaction);
 			updateBalance(connection, fromId//
-					, getBalance(connection, fromId) - transaction.amount());
+					, getBalance(connection, fromId) - amount);
 			updateBalance(connection, toId//
-					, getBalance(connection, toId) + transaction.amount());
+					, getBalance(connection, toId) + amount);
+			System.out.printf(" Transaction has been completed!%n%n");
 			System.out.printf(" Your new balance : $%,d%n%n", getBalance(connection, fromId));
 		} else {
-			throw new OperationException("Your balance doesn't have enough amount!%n%n");
+			throw new OperationException("Your balance doesn't have enough amount!");
 		}
 
+	}
+
+	private void logToDb(Connection connection, Transaction transaction) throws SQLException, OperationException {
+		try (var ps = connection.prepareStatement("""
+				INSERT INTO transaction(from_id,to_id,amount,fee,time,new_balance)
+				VALUES(?,?,?,?,?,?)
+				""")) {
+			ps.setInt(1, transaction.from().id());
+			ps.setInt(2, transaction.to().id());
+			ps.setInt(3, transaction.amount());
+			ps.setInt(4, transaction.feeAmount());
+			ps.setTimestamp(5, java.sql.Timestamp.valueOf(transaction.time()));
+			ps.setInt(6, getBalance(connection, transaction.from().id()) - transaction.total());
+			if (ps.executeUpdate() < 1) {
+				throw new OperationException("Something went wrong while approving transaction!");
+			}
+		}
 	}
 
 	// *********************************
@@ -46,7 +66,7 @@ public class TransactionHandlerImpl implements TransactionHandler {
 	public void makeWithdraw(Connection connection, int userId, int amount) throws OperationException, SQLException {
 		long balance = getBalance(connection, userId);
 		if (balance < amount) {
-			System.out.printf("Your balance doesn't have enough amount!%n%n");
+			System.out.printf("%n Your balance doesn't have enough amount!%n");
 		} else {
 			long newBalance = balance - amount;
 			updateBalance(connection, userId, newBalance);
