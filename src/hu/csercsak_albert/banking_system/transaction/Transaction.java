@@ -1,4 +1,4 @@
-package hu.csercsak_albert.banking_system.general;
+package hu.csercsak_albert.banking_system.transaction;
 
 import java.time.LocalDateTime;
 

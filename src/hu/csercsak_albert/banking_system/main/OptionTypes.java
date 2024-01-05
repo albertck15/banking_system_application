@@ -6,7 +6,8 @@ public enum OptionTypes {
 	WITHDRAW("Withdraw"),
 	DEPOSIT("Deposit"),
 	SHOW_BALANCE("Show balance"),
-	TRANSFER("Transfer money");
+	TRANSFER("Transfer money"),
+	TRANSACTION_HISTORY("Transaction history");
 
 	private final String label;
 

@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import hu.csercsak_albert.banking_system.general.OperationException;
-import hu.csercsak_albert.banking_system.general.Transaction;
+import hu.csercsak_albert.banking_system.transaction.Transaction;
 
 public interface TransactionHandler {
 

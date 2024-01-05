@@ -5,10 +5,10 @@ import java.time.LocalDateTime;
 
 import hu.csercsak_albert.banking_system.general.FastQuitException;
 import hu.csercsak_albert.banking_system.general.OperationException;
-import hu.csercsak_albert.banking_system.general.Transaction;
 import hu.csercsak_albert.banking_system.main.OptionTypes;
 import hu.csercsak_albert.banking_system.main.TransactionHandler;
 import hu.csercsak_albert.banking_system.main.User;
+import hu.csercsak_albert.banking_system.transaction.Transaction;
 import hu.csercsak_albert.banking_system.transaction.TransactionHandlerImpl;
 
 class MOTransfer extends AbstractMenuOption {
@@ -48,9 +48,13 @@ class MOTransfer extends AbstractMenuOption {
 
 	private int getAmount() throws FastQuitException, SQLException, OperationException {
 		int amount = 0;
+		int counter = 0;
 		do {
 			amount = userInput.inputInt("Please enter the amount", 0, Integer.MAX_VALUE);
 			System.out.println();
+			if (counter++ > 0) {
+				System.out.printf("Your balance doesn't have enough amount!%n%n");
+			}
 		} while (hasBalance(amount));
 		return amount;
 	}
@@ -84,7 +88,7 @@ class MOTransfer extends AbstractMenuOption {
 	private boolean approve(Transaction transaction) throws FastQuitException {
 		String message = """
 				 Transaction details:
-				  Reciever account number : %d
+				  Reciever's account number : %d
 				  Amount : %,d$
 				  Fee : %,d$
 				  Total : %,d$
