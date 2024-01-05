@@ -13,7 +13,6 @@ systems.
 I have included the script files to set up the database. 
 Start with executing the *'albert_banking_system_user.sql'* file, then execute the 
 *'albert_banking_system_balance.sql'*, and then execute the *'albert_banking_system_transaction.sql'* scripts.
-## What this application can do?
 
 2. Check connection and properties
 
