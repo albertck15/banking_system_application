@@ -42,8 +42,8 @@ public class TransactionHandlerImpl implements TransactionHandler {
 
 	private void logToDb(Connection connection, Transaction transaction) throws SQLException, OperationException {
 		try (var ps = connection.prepareStatement("""
-				INSERT INTO transaction(from_id,to_id,amount,fee,time,new_balance)
-				VALUES(?,?,?,?,?,?)
+				INSERT INTO transaction(from_id,to_id,amount,fee,time,new_balance,description)
+				VALUES(?,?,?,?,?,?,?)
 				""")) {
 			ps.setInt(1, transaction.from().id());
 			ps.setInt(2, transaction.to().id());
@@ -51,6 +51,7 @@ public class TransactionHandlerImpl implements TransactionHandler {
 			ps.setInt(4, transaction.feeAmount());
 			ps.setTimestamp(5, java.sql.Timestamp.valueOf(transaction.time()));
 			ps.setInt(6, getBalance(connection, transaction.from().id()) - transaction.total());
+			ps.setString(7, transaction.description());
 			if (ps.executeUpdate() < 1) {
 				throw new OperationException("Something went wrong while approving transaction!");
 			}

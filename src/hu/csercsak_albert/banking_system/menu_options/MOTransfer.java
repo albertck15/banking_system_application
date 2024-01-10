@@ -39,8 +39,11 @@ class MOTransfer extends AbstractMenuOption {
 		}
 		int toAccountNum = getAccountNum();
 		User to = getUserByAccNum(toAccountNum);
+		String desc = userInput.inputBool("Would you like to add a description for the transaction") //
+				? userInput.inputText("Description")
+				: null;
 		Transaction transaction = new Transaction//
-		(this.user, to, amount, fee, total, LocalDateTime.now(), 0); // dummy new balance
+		(this.user, to, amount, fee, total, LocalDateTime.now(), 0, desc); // Dummy new balance
 		if (approve(transaction)) {
 			TRANSACTION_HANDLER.makeTransaction(connection, transaction);
 		}
@@ -50,12 +53,12 @@ class MOTransfer extends AbstractMenuOption {
 		int amount = 0;
 		int counter = 0;
 		do {
-			amount = userInput.inputInt("Please enter the amount", 0, Integer.MAX_VALUE);
 			System.out.println();
 			if (counter++ > 0) {
 				System.out.printf("Your balance doesn't have enough amount!%n%n");
 			}
-		} while (hasBalance(amount));
+			amount = userInput.inputInt("Please enter the amount", 0, Integer.MAX_VALUE);
+		} while (!hasBalance(amount));
 		return amount;
 	}
 
@@ -64,7 +67,7 @@ class MOTransfer extends AbstractMenuOption {
 		do {
 			toAccountNum = userInput.inputInt("Please insert reciever's account number", 0, Integer.MAX_VALUE);
 			System.out.println();
-		} while (isValid(toAccountNum) || toAccountNum == user.accountNumber());
+		} while (!isValid(toAccountNum) || toAccountNum == user.accountNumber());
 		return toAccountNum;
 	}
 
@@ -87,15 +90,17 @@ class MOTransfer extends AbstractMenuOption {
 
 	private boolean approve(Transaction transaction) throws FastQuitException {
 		String message = """
-				 Transaction details:
-				  Reciever's account number : %d
-				  Amount : %,d$
-				  Fee : %,d$
-				  Total : %,d$
 
-				 Apply
-				""".formatted(transaction.to().accountNumber(), //
-				transaction.amount(), transaction.feeAmount(), transaction.total());
+				Transaction details:
+				 Reciever's account number : %d
+				 Amount : %,d$
+				 Fee : %,d$
+				 Total : %,d$%s
+
+				Apply""".formatted(transaction.to().accountNumber(), //
+				transaction.amount(), transaction.feeAmount(), transaction.total(), //
+				transaction.description() == null ? "" //
+						: "%n Description : %s".formatted(transaction.description()));
 		return userInput.inputBool(message);
 	}
 
@@ -104,7 +109,7 @@ class MOTransfer extends AbstractMenuOption {
 			ps.setInt(1, user.id());
 			try (var rs = ps.executeQuery()) {
 				rs.next();
-				return !(rs.getInt(1) >= amount);
+				return rs.getInt(1) >= amount;
 			}
 		}
 	}
@@ -113,7 +118,8 @@ class MOTransfer extends AbstractMenuOption {
 		try (var ps = connection.prepareStatement("SELECT COUNT(*) FROM user WHERE account_number = ?")) {
 			ps.setInt(1, toAccountNum);
 			try (var rs = ps.executeQuery()) {
-				return !rs.next();
+				rs.next();
+				return rs.getInt(1) != 0;
 			}
 		}
 	}
