@@ -21,10 +21,10 @@ public class Main {
 		var th = new TextHolder();
 		th.welcome();
 		try (var connection = getConnection(); var userInput = new UserInput()) {
-			Menu menu = new MenuImpl.Builder().setConnection(connection)//
-					.setUserInput(userInput)//
-					.setPrompt("-->")//
-					.addOptions(OptionTypes.values())//
+			Menu menu = new MenuImpl.Builder().setConnection(connection) //
+					.setUserInput(userInput) //
+					.setPrompt("-->") //
+					.addOptions(OptionTypes.values()) //
 					.build();
 			chooseAndExecute(menu);
 		} catch (SQLException e) {

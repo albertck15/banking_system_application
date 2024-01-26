@@ -5,6 +5,7 @@ import java.sql.SQLException;
 
 import hu.csercsak_albert.banking_system.general.OperationException;
 import hu.csercsak_albert.banking_system.main.TransactionHandler;
+import hu.csercsak_albert.banking_system.main.User;
 
 public class TransactionHandlerImpl implements TransactionHandler {
 
@@ -33,7 +34,7 @@ public class TransactionHandlerImpl implements TransactionHandler {
 			updateBalance(connection, toId//
 					, getBalance(connection, toId) + amount);
 			System.out.printf(" Transaction has been completed!%n%n");
-			System.out.printf(" Your new balance : $%,d%n%n", getBalance(connection, fromId));
+			System.out.printf(" Your balance : $%,d%n%n", getBalance(connection, fromId));
 		} else {
 			throw new OperationException("Your balance doesn't have enough amount!");
 		}
@@ -47,7 +48,7 @@ public class TransactionHandlerImpl implements TransactionHandler {
 				""")) {
 			ps.setInt(1, transaction.from().id());
 			ps.setInt(2, transaction.to().id());
-			ps.setInt(3, transaction.amount());
+			ps.setString(3, "+" + transaction.amount());
 			ps.setInt(4, transaction.feeAmount());
 			ps.setTimestamp(5, java.sql.Timestamp.valueOf(transaction.time()));
 			ps.setInt(6, getBalance(connection, transaction.from().id()) - transaction.total());
@@ -63,15 +64,16 @@ public class TransactionHandlerImpl implements TransactionHandler {
 	//
 
 	@Override
-	public void makeWithdraw(Connection connection, int userId, int amount) throws OperationException, SQLException {
-		long balance = getBalance(connection, userId);
+	public void makeWithdraw(Connection connection, User user, int amount) throws OperationException, SQLException {
+		long balance = getBalance(connection, user.id());
 		if (balance < amount) {
 			System.out.printf("%n Your balance doesn't have enough amount!%n");
 		} else {
 			long newBalance = balance - amount;
-			updateBalance(connection, userId, newBalance);
+			Transaction withdraw = new Transaction(user, user, "-" + amount, 0, amount, null, amount, null)
+			updateBalance(connection, user.id(), newBalance);
 		}
-		System.out.printf("%n Your new balance : $%,d%n%n", getBalance(connection, userId));
+		System.out.printf("%nOperation made succesfully!%n Your balance : $%,d%n", getBalance(connection, user.id()));
 	}
 
 	// *********************************
@@ -79,9 +81,9 @@ public class TransactionHandlerImpl implements TransactionHandler {
 	//
 
 	@Override
-	public void makeDeposit(Connection connection, int userId, int amount) throws OperationException, SQLException {
-		updateBalance(connection, userId, amount + getBalance(connection, userId));
-		System.out.printf("%n Your new balance : $%,d%n", getBalance(connection, userId));
+	public void makeDeposit(Connection connection, User user, int amount) throws OperationException, SQLException {
+		updateBalance(connection, user.id(), amount + getBalance(connection, user.id()));
+		System.out.printf("%nOperation made succesfully!%n Your balance : $%,d%n", getBalance(connection, user.id()));
 	}
 
 	// *********************************

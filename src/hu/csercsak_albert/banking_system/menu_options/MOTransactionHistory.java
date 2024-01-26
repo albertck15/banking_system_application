@@ -14,7 +14,7 @@ class MOTransactionHistory extends AbstractMenuOption {
 
 	@Override
 	void doExecute() throws OperationException, SQLException, FastQuitException {
-		// TODO Implement option
+		List<Transaction>
 	}
 
 }

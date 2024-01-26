@@ -19,6 +19,6 @@ class MODeposit extends AbstractMenuOption {
 	@Override
 	void doExecute() throws OperationException, SQLException, FastQuitException {
 		int amount = userInput.inputInt("Enter deposit amount", 0, Integer.MAX_VALUE);
-		TRANSACTION_HANDLER.makeDeposit(connection, user.id(), amount);
+		TRANSACTION_HANDLER.makeDeposit(connection, user, amount);
 	}
 }

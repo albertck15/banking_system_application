@@ -43,7 +43,7 @@ class MOTransfer extends AbstractMenuOption {
 				? userInput.inputText("Description")
 				: null;
 		Transaction transaction = new Transaction//
-		(this.user, to, amount, fee, total, LocalDateTime.now(), 0, desc); // Dummy new balance
+		(this.user, to, "-" + amount, fee, total, LocalDateTime.now(), 0, desc); // Dummy new balance
 		if (approve(transaction)) {
 			TRANSACTION_HANDLER.makeTransaction(connection, transaction);
 		}

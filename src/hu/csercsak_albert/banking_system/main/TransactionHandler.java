@@ -10,7 +10,7 @@ public interface TransactionHandler {
 
 	void makeTransaction(Connection connection, Transaction transaction) throws OperationException, SQLException;
 
-	void makeWithdraw(Connection connection, int userId, int amount) throws OperationException, SQLException;
+	void makeDeposit(Connection connection, User user, int amount) throws OperationException, SQLException;
 
-	void makeDeposit(Connection connection, int userId, int amount) throws OperationException, SQLException;
+	void makeWithdraw(Connection connection, User user, int amount) throws OperationException, SQLException;
 }

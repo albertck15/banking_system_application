@@ -19,6 +19,6 @@ class MOWithdraw extends AbstractMenuOption {
 	@Override
 	void doExecute() throws OperationException, SQLException, FastQuitException {
 		int withdrawAmount = userInput.inputInt("Enter the amount", 0, Integer.MAX_VALUE);
-		TRANSACTION_HANDLER.makeWithdraw(connection, user.id(), withdrawAmount);
+		TRANSACTION_HANDLER.makeWithdraw(connection, user, withdrawAmount);
 	}
 }

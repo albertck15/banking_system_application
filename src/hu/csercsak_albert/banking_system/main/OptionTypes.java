@@ -5,7 +5,7 @@ public enum OptionTypes {
 	// Main menu after logging in
 	WITHDRAW("Withdraw"),
 	DEPOSIT("Deposit"),
-	SHOW_BALANCE("Show balance"),
+	SHOW_DETAILS("Show details"),
 	TRANSFER("Transfer money"),
 	TRANSACTION_HISTORY("Transaction history");
 
