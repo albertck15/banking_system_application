@@ -5,6 +5,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import hu.csercsak_albert.banking_system.general.FastQuitException;
 import hu.csercsak_albert.banking_system.general.OperationException;
 import hu.csercsak_albert.banking_system.main.Menu;
@@ -15,6 +18,8 @@ import hu.csercsak_albert.banking_system.main.UserInput;
 import hu.csercsak_albert.banking_system.menu_options.MenuOptionServicePointImpl;
 
 public class MenuImpl implements Menu {
+
+	private static final Logger LOG = LogManager.getLogger(MenuImpl.class);
 
 	private User user;
 	private final Connection connection;
@@ -30,6 +35,7 @@ public class MenuImpl implements Menu {
 		this.options = getMenuOptions(builder.options.toArray(new OptionTypes[0]));
 		addExitOption();
 		this.menuText = compileMenuText();
+		LOG.info("initialized");
 	}
 
 	private void addExitOption() {
@@ -67,6 +73,7 @@ public class MenuImpl implements Menu {
 	}
 
 	private void setupOptions() {
+		LOG.info("setting up menu options");
 		for (MenuOption option : options) {
 			option.setup(connection, userInput, user);
 		}
@@ -77,6 +84,7 @@ public class MenuImpl implements Menu {
 	}
 
 	private List<MenuOption> getMenuOptions(OptionTypes[] options) {
+		LOG.info("getting menu options");
 		return MenuOptionServicePointImpl.getInstance().getOptions(options);
 	}
 
@@ -85,6 +93,7 @@ public class MenuImpl implements Menu {
 	}
 
 	private String compileMenuText() {
+		LOG.info("compiling menu text");
 		var menuTextBuilder = new StringBuilder();
 		int i = 1;
 		for (var option : options) {

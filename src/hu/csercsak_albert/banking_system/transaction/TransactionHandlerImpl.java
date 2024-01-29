@@ -2,6 +2,7 @@ package hu.csercsak_albert.banking_system.transaction;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 
 import hu.csercsak_albert.banking_system.general.OperationException;
 import hu.csercsak_albert.banking_system.main.TransactionHandler;
@@ -28,7 +29,7 @@ public class TransactionHandlerImpl implements TransactionHandler {
 		int toId = transaction.to().id();
 		int amount = transaction.total();
 		if (isAmountAvailable(connection, fromId, amount)) {
-			logToDb(connection, transaction);
+			logTransaction(connection, transaction);
 			updateBalance(connection, fromId//
 					, getBalance(connection, fromId) - amount);
 			updateBalance(connection, toId//
@@ -41,36 +42,19 @@ public class TransactionHandlerImpl implements TransactionHandler {
 
 	}
 
-	private void logToDb(Connection connection, Transaction transaction) throws SQLException, OperationException {
-		try (var ps = connection.prepareStatement("""
-				INSERT INTO transaction(from_id,to_id,amount,fee,time,new_balance,description)
-				VALUES(?,?,?,?,?,?,?)
-				""")) {
-			ps.setInt(1, transaction.from().id());
-			ps.setInt(2, transaction.to().id());
-			ps.setString(3, "+" + transaction.amount());
-			ps.setInt(4, transaction.feeAmount());
-			ps.setTimestamp(5, java.sql.Timestamp.valueOf(transaction.time()));
-			ps.setInt(6, getBalance(connection, transaction.from().id()) - transaction.total());
-			ps.setString(7, transaction.description());
-			if (ps.executeUpdate() < 1) {
-				throw new OperationException("Something went wrong while approving transaction!");
-			}
-		}
-	}
-
 	// *********************************
 	// Withdraw
 	//
 
 	@Override
 	public void makeWithdraw(Connection connection, User user, int amount) throws OperationException, SQLException {
-		long balance = getBalance(connection, user.id());
+		int balance = getBalance(connection, user.id());
 		if (balance < amount) {
 			System.out.printf("%n Your balance doesn't have enough amount!%n");
 		} else {
-			long newBalance = balance - amount;
-			Transaction withdraw = new Transaction(user, user, "-" + amount, 0, amount, null, amount, null)
+			int newBalance = balance - amount;
+			Withdraw withdraw = new Withdraw(user, amount, newBalance, LocalDateTime.now());
+			logWithdraw(connection, withdraw);
 			updateBalance(connection, user.id(), newBalance);
 		}
 		System.out.printf("%nOperation made succesfully!%n Your balance : $%,d%n", getBalance(connection, user.id()));
@@ -82,7 +66,10 @@ public class TransactionHandlerImpl implements TransactionHandler {
 
 	@Override
 	public void makeDeposit(Connection connection, User user, int amount) throws OperationException, SQLException {
-		updateBalance(connection, user.id(), amount + getBalance(connection, user.id()));
+		int newBalance = amount + getBalance(connection, user.id());
+		updateBalance(connection, user.id(), newBalance);
+		Deposit deposit = new Deposit(user, amount, newBalance, LocalDateTime.now());
+		logDeposit(connection, deposit);
 		System.out.printf("%nOperation made succesfully!%n Your balance : $%,d%n", getBalance(connection, user.id()));
 	}
 
@@ -111,6 +98,58 @@ public class TransactionHandlerImpl implements TransactionHandler {
 			ps.setLong(1, newBalance);
 			ps.setInt(2, userId);
 			ps.executeUpdate();
+		}
+	}
+
+	// *********************************
+	// Logging interactions to the database
+	//
+
+	private void logTransaction(Connection connection, Transaction transaction) throws SQLException, OperationException {
+		try (var ps = connection.prepareStatement("""
+				INSERT INTO transaction(from_id,to_id,amount,fee,date,new_balance,description)
+				VALUES(?,?,?,?,?,?,?)
+				""")) {
+			ps.setInt(1, transaction.from().id());
+			ps.setInt(2, transaction.to().id());
+			ps.setInt(3, transaction.amount());
+			ps.setInt(4, transaction.feeAmount());
+			ps.setTimestamp(5, java.sql.Timestamp.valueOf(transaction.date()));
+			ps.setInt(6, getBalance(connection, transaction.from().id()) - transaction.total());
+			ps.setString(7, transaction.description());
+			if (ps.executeUpdate() < 1) {
+				throw new OperationException("Something went wrong while approving transaction!");
+			}
+		}
+	}
+
+	private void logWithdraw(Connection connection, Withdraw withdraw) throws SQLException, OperationException {
+		try (var ps = connection.prepareStatement("""
+				INSERT INTO withdraw(user_id,amount,new_balance,date)
+				VALUES(?,?,?,?)
+				""")) {
+			ps.setInt(1, withdraw.user().id());
+			ps.setInt(2, withdraw.amount());
+			ps.setInt(3, withdraw.newBalance());
+			ps.setTimestamp(4, java.sql.Timestamp.valueOf(withdraw.date()));
+			if (ps.executeUpdate() < 1) {
+				throw new OperationException("Something went wrong while approving transaction!");
+			}
+		}
+	}
+	
+	private void logDeposit(Connection connection, Deposit deposit) throws SQLException, OperationException {
+		try (var ps = connection.prepareStatement("""
+				INSERT INTO deposit(user_id,amount,new_balance,date)
+				VALUES(?,?,?,?)
+				""")) {
+			ps.setInt(1, deposit.user().id());
+			ps.setInt(2, deposit.amount());
+			ps.setInt(3, deposit.newBalance());
+			ps.setTimestamp(4, java.sql.Timestamp.valueOf(deposit.date()));
+			if (ps.executeUpdate() < 1) {
+				throw new OperationException("Something went wrong while approving transaction!");
+			}
 		}
 	}
 }

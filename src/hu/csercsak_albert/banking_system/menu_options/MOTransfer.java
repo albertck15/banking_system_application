@@ -3,6 +3,9 @@ package hu.csercsak_albert.banking_system.menu_options;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import hu.csercsak_albert.banking_system.general.FastQuitException;
 import hu.csercsak_albert.banking_system.general.OperationException;
 import hu.csercsak_albert.banking_system.main.OptionTypes;
@@ -13,6 +16,8 @@ import hu.csercsak_albert.banking_system.transaction.TransactionHandlerImpl;
 
 class MOTransfer extends AbstractMenuOption {
 
+	private static final Logger LOG = LogManager.getLogger(MOTransfer.class);
+
 	private static final double TRANSACTION_FEE = 2.6d; // in %
 
 	private static final int FEE_LIMIT = 10_000;
@@ -21,6 +26,7 @@ class MOTransfer extends AbstractMenuOption {
 
 	MOTransfer(OptionTypes type) {
 		super(type.getLabel());
+		LOG.info("initialized");
 	}
 
 	@Override
@@ -29,11 +35,14 @@ class MOTransfer extends AbstractMenuOption {
 		int fee = 0;
 		int total = amount;
 		if (amount >= FEE_LIMIT) {
+			LOG.info("transaction will have fee");
 			boolean choice = userInput.inputBool("This transaction will have a %.1f%% fee. Countinue".formatted(TRANSACTION_FEE));
 			if (choice) {
+				LOG.info("adding fee");
 				fee = (int) (amount * (TRANSACTION_FEE / 100d));
 				total += fee;
 			} else {
+				LOG.info("cancelled");
 				throw new OperationException("You've cancelled the transaction");
 			}
 		}
@@ -43,8 +52,9 @@ class MOTransfer extends AbstractMenuOption {
 				? userInput.inputText("Description")
 				: null;
 		Transaction transaction = new Transaction//
-		(this.user, to, "-" + amount, fee, total, LocalDateTime.now(), 0, desc); // Dummy new balance
+		(this.user, to, amount, fee, total, LocalDateTime.now(), 0, desc); // Dummy new balance
 		if (approve(transaction)) {
+			LOG.info("calling transaction handler");
 			TRANSACTION_HANDLER.makeTransaction(connection, transaction);
 		}
 	}
@@ -55,14 +65,17 @@ class MOTransfer extends AbstractMenuOption {
 		do {
 			System.out.println();
 			if (counter++ > 0) {
+				LOG.info("User does not have enough amount (%d$)".formatted(amount));
 				System.out.printf("Your balance doesn't have enough amount!%n%n");
 			}
 			amount = userInput.inputInt("Please enter the amount", 0, Integer.MAX_VALUE);
 		} while (!hasBalance(amount));
+		LOG.info("returning (%d$) amount".formatted(amount));
 		return amount;
 	}
 
 	private int getAccountNum() throws FastQuitException, SQLException {
+		LOG.info("asking user for account number");
 		int toAccountNum = 0;
 		do {
 			toAccountNum = userInput.inputInt("Please insert reciever's account number", 0, Integer.MAX_VALUE);
@@ -72,6 +85,7 @@ class MOTransfer extends AbstractMenuOption {
 	}
 
 	private User getUserByAccNum(int accountNum) throws SQLException {
+		LOG.info("getting user by account number");
 		try (var ps = connection.prepareStatement("""
 				SELECT id, username, first_name, last_name, email, account_number FROM user
 				WHERE account_number = ?
@@ -89,6 +103,7 @@ class MOTransfer extends AbstractMenuOption {
 	//
 
 	private boolean approve(Transaction transaction) throws FastQuitException {
+		LOG.info("approving");
 		String message = """
 
 				Transaction details:
@@ -105,6 +120,7 @@ class MOTransfer extends AbstractMenuOption {
 	}
 
 	private boolean hasBalance(int amount) throws SQLException {
+		LOG.info("checking balance");
 		try (var ps = connection.prepareStatement("SELECT balance FROM balance where user_id = ?")) {
 			ps.setInt(1, user.id());
 			try (var rs = ps.executeQuery()) {
@@ -115,6 +131,7 @@ class MOTransfer extends AbstractMenuOption {
 	}
 
 	private boolean isValid(int toAccountNum) throws SQLException {
+		LOG.info("validating account number");
 		try (var ps = connection.prepareStatement("SELECT COUNT(*) FROM user WHERE account_number = ?")) {
 			ps.setInt(1, toAccountNum);
 			try (var rs = ps.executeQuery()) {

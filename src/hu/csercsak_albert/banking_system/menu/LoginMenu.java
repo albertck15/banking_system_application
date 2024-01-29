@@ -4,6 +4,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Random;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import hu.csercsak_albert.banking_system.general.FastQuitException;
 import hu.csercsak_albert.banking_system.general.OperationException;
 import hu.csercsak_albert.banking_system.main.User;
@@ -13,6 +16,8 @@ import hu.csercsak_albert.banking_system.validator.PasswordValidator;
 import hu.csercsak_albert.banking_system.validator.UsernameValidator;
 
 class LoginMenu {
+
+	private static final Logger LOG = LogManager.getLogger(LoginMenu.class);
 
 	private final Connection connection;
 	private final UserInput userInput;
@@ -28,11 +33,13 @@ class LoginMenu {
 	LoginMenu(Connection connection, UserInput userInput) {
 		this.connection = connection;
 		this.userInput = userInput;
+		LOG.info("initialized");
 	}
 
 	User loginOrRegister() throws SQLException, FastQuitException {
 		User user = null;
 		System.out.println(menuText);
+		LOG.info("user asked to login or register");
 		do {
 			try {
 				if (userInput.inputInt("Choose", 1, 2) == 1) {
@@ -41,21 +48,27 @@ class LoginMenu {
 					user = register();
 				}
 			} catch (OperationException e) {
+				LOG.info("OperationException (%s)".formatted(e.getMessage()));
 				System.out.printf("%s!%n%n", e.getMessage());
 			}
 		} while (user == null);
+		LOG.info("returning user");
 		return user;
 	}
 
 	private User login() throws SQLException, OperationException, FastQuitException {
+		LOG.info("logging in");
 		String username = null;
 		do {
 			System.out.println();
 			username = userInput.inputText("Username");
+			LOG.info("username inserted : " + username);
 			if (!isUserExists(username)) {
 				if (userInput.inputBool("\n Username not found! Would you like to register with this username")) {
+					LOG.info("username not found, user choosed to register it");
 					return register(username);
 				} else {
+					LOG.info("username not found, asking again");
 					username = null;
 				}
 			}
@@ -68,6 +81,7 @@ class LoginMenu {
 		do {
 			String password = String.valueOf(userInput.inputText("Password").hashCode());
 			try {
+				LOG.info("password inserted, logging in");
 				user = loginUser(username, password);
 			} catch (OperationException e) {
 				System.out.println(e.getMessage() + "!");
@@ -85,9 +99,12 @@ class LoginMenu {
 	}
 
 	private User register(String username) throws SQLException, OperationException, FastQuitException {
+		LOG.info("registering");
 		if (isUserExists(username) && !userInput.inputBool("\n Username already exists! Would you like to login")) { // TODO Not working correctly.
+			LOG.info("user stopped the login process");
 			throw new OperationException("You've stopped the login process");
 		} else if (isUserExists(username)) {
+			LOG.info("username found, redirecting user to login");
 			return login(username);
 		}
 		String password;
@@ -106,13 +123,15 @@ class LoginMenu {
 		if (registerNewUser(password, user)) {
 			user = new User(getUserId(user), username, firstName, lastName, email, accountNumber); // replacing dummy ID
 			setDefaultBalance(user);
+			LOG.info("registering new user has been succesfull");
 			System.out.printf("%n You've succesfully registered!%n%n");
 			return user;
 		}
 		throw new UnsupportedOperationException("Registering new user has been failed");
 	}
 
-	private void setDefaultBalance(User user) throws SQLException {
+	private void setDefaultBalance(User user) throws SQLException { // TODO Maybe RDBMS could do this
+		LOG.info("setting new user's default balance");
 		try (var ps = connection.prepareStatement("INSERT INTO balance(user_id,balance) VALUES(?,?)")) {
 			ps.setInt(1, getUserId(user));
 			ps.setLong(2, 0);
@@ -133,6 +152,7 @@ class LoginMenu {
 	}
 
 	private boolean registerNewUser(String hashedPassword, User user) throws SQLException {
+		LOG.info("registering new user to database");
 		try (var ps = connection.prepareStatement("""
 				INSERT INTO user(username, password, first_name, last_name, email, account_number)
 				VALUES(?, ?, ?, ?, ?, ?);
@@ -145,6 +165,7 @@ class LoginMenu {
 			ps.setInt(6, user.accountNumber());
 			ps.executeUpdate();
 		}
+		LOG.info("done");
 		return isUserExists(user.username()); // Checking if the registration was successful
 	}
 
@@ -171,6 +192,7 @@ class LoginMenu {
 		do {
 			number = random.nextInt(9_999_999);
 		} while (isAccountNumberAvailable(number));
+		LOG.info("%,d number generatod for the new user".formatted(number));
 		return number;
 	}
 

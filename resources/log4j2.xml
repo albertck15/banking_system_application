@@ -1,0 +1,25 @@
+<!DOCTYPE xml>
+<Configuration status="INFO">
+	<Appenders>
+		<!-- RollingFile Appender -->
+		<RollingFile name="RollingFile"
+			fileName="C:\Dev\Logs\BankingSystem\App.log"
+			filePattern="C:\Dev\Logs\BankingSystem\App-%d{yyyy-MM-dd}-%i.log">
+			<PatternLayout>
+				<Pattern>%d{ISO8601} %-5p %30.30c{1} | %m%n</Pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="10 MB" />
+			</Policies>
+			<DefaultRolloverStrategy fileIndex="min"
+				max="5" />
+		</RollingFile>
+	</Appenders>
+	<Loggers>
+		<!-- Root Logger -->
+		<Root level="INFO">
+			<AppenderRef ref="RollingFile" />
+		</Root>
+	</Loggers>
+</Configuration>
